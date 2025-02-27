@@ -92,12 +92,6 @@ export default class App extends Component {
       <section className="todoapp">
         <Header onItemAdded={this.addItem} />
         <section className="main">
-          {/* <ul
-            className="todo-list"
-            onItemAdded={addItem}
-          >
-            <TodoItem label={"as"} />
-          </ul> */}
           <ToDoList todos={visibleItems} onCompleted={this.completedItem} onDeleted={this.deletedItem} />
         </section>
         <Footer showFilter={this.showFilteredItems} numberLeft={numberLeft} />
