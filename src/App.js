@@ -6,16 +6,22 @@ import ToDoList from './components/TodoList';
 import Footer from './components/Footer';
 
 export default class App extends Component {
-  createTodoItem = (label) => {
+  createTodoItem = (label, time) => {
     return {
       label,
       time: new Date(),
       id: Math.random(),
+      timerTime: time,
+      isEditing: false,
     };
   };
 
   state = {
-    todoData: [this.createTodoItem('wake up'), this.createTodoItem('grind'), this.createTodoItem('go to sleep')],
+    todoData: [
+      this.createTodoItem('wake up', 300),
+      this.createTodoItem('grind', 300),
+      this.createTodoItem('go to sleep', 300),
+    ],
     filter: 'all',
   };
 
@@ -25,6 +31,17 @@ export default class App extends Component {
     const newItem = { ...oldItem, [propName]: !oldItem[propName] };
 
     return [...arr.slice(0, idx), newItem, ...arr.slice(idx + 1)];
+  };
+
+  setTimerTime = (id, timerTime) => {
+    this.setState(({ todoData }) => {
+      const idx = this.state.todoData.findIndex((el) => el.id === id);
+      const itemToSetTime = this.state.todoData[idx];
+      const newItem = { ...itemToSetTime, timerTime };
+      return {
+        todoData: [...todoData.slice(0, idx), newItem, ...todoData.slice(idx + 1)],
+      };
+    });
   };
 
   completedItem = (id) => {
@@ -46,9 +63,9 @@ export default class App extends Component {
     });
   };
 
-  addItem = (text) => {
+  addItem = (text, time) => {
     if (!text) return;
-    const newItem = this.createTodoItem(text);
+    const newItem = this.createTodoItem(text, time);
 
     this.setState(({ todoData }) => {
       return { todoData: [...todoData, newItem] };
@@ -69,6 +86,26 @@ export default class App extends Component {
       return { todoData: completed };
     });
   };
+
+  onEdited = (id) => {
+    this.setState(({ todoData }) => {
+       return {
+        todoData: this.toggleProperty(todoData, id, 'isEditing'),
+      };
+    });
+  };
+
+  onSubmitedEdit = (id, text) => {
+    if (!text) return
+    this.setState(({ todoData }) => {
+      const idx = todoData.findIndex((el) => el.id === id);
+      todoData[idx].label = text;
+      !todoData[idx].isEditing;
+    });
+    this.onEdited(id)
+  };
+  
+
 
   render() {
     const { todoData, filter } = this.state;
@@ -92,13 +129,14 @@ export default class App extends Component {
       <section className="todoapp">
         <Header onItemAdded={this.addItem} />
         <section className="main">
-          {/* <ul
-            className="todo-list"
-            onItemAdded={addItem}
-          >
-            <TodoItem label={"as"} />
-          </ul> */}
-          <ToDoList todos={visibleItems} onCompleted={this.completedItem} onDeleted={this.deletedItem} />
+          <ToDoList
+            todos={visibleItems}
+            onCompleted={this.completedItem}
+            onDeleted={this.deletedItem}
+            setTimerTime={this.setTimerTime}
+            onEdited={this.onEdited}
+            onSubmitedEdit={this.onSubmitedEdit}
+          />
         </section>
         <Footer showFilter={this.showFilteredItems} numberLeft={numberLeft} />
       </section>
